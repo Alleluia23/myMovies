@@ -83,7 +83,8 @@ def insert_movie(douban_name,notion_helper):
             "状态": movie.get("状态"),
             "日期": movie.get("日期"),
             "评分": movie.get("评分"),
-            "page_id": i.get("id")
+            "page_id": i.get("id"),
+            "类型": movie.get("分类")
         }
     print(f"notion {len(notion_movie_dict)}")
     results = []
@@ -103,10 +104,22 @@ def insert_movie(douban_name,notion_helper):
         movie["日期"] = create_time.int_timestamp
         movie["豆瓣链接"] = subject.get("url")
         movie["状态"] = movie_status.get(result.get("status"))
+        
         if result.get("rating"):
             movie["评分"] = rating.get(result.get("rating").get("value"))
+            
         if result.get("comment"):
             movie["短评"] = result.get("comment")
+            
+        if subject.get("genres"):
+            movie["分类"] = [
+                notion_helper.get_relation_id(
+                    x, notion_helper.category_database_id, TAG_ICON_URL
+                )
+                for x in subject.get("genres")
+            ]
+        
+        # 检查 Notion 是否已存在，更新或插入
         if notion_movie_dict.get(movie.get("豆瓣链接")):
             notion_movive = notion_movie_dict.get(movie.get("豆瓣链接"))
             if (
@@ -114,8 +127,10 @@ def insert_movie(douban_name,notion_helper):
                 or notion_movive.get("短评") != movie.get("短评")
                 or notion_movive.get("状态") != movie.get("状态")
                 or notion_movive.get("评分") != movie.get("评分")
+                or notion_movive.get("分类") != movie.get("分类")
             ):
                 properties = utils.get_properties(movie, movie_properties_type_dict)
+                properties["分类"] = {"relation": [{"id": x} for x in movie["分类"]]}
                 notion_helper.get_date_relation(properties,create_time)
                 notion_helper.update_page(
                     page_id=notion_movive.get("page_id"),
@@ -154,6 +169,7 @@ def insert_movie(douban_name,notion_helper):
                     for x in subject.get("directors")[0:100]
                 ]
             properties = utils.get_properties(movie, movie_properties_type_dict)
+            properties["分类"] = {"relation": [{"id": x} for x in movie["分类"]]}
             notion_helper.get_date_relation(properties,create_time)
             parent = {
                 "database_id": notion_helper.movie_database_id,
