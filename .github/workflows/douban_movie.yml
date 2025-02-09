@@ -47,6 +47,12 @@ jobs:
       - name: Set default year if not provided
         run: echo "YEAR=$(date +"%Y")" >> $GITHUB_ENV
         if: env.YEAR == ''
+      
+      - name: Debug Notion Configuration
+        run: |
+          echo "NOTION_MOVIE_URL=${{ secrets.NOTION_MOVIE_URL }}"
+          echo "MOVIE_NOTION_TOKEN=${{ secrets.MOVIE_NOTION_TOKEN }}"
+          echo "DATABASE_ID=${{ env.DATABASE_ID }}"
 
       - name: notion heatmap
         run: |

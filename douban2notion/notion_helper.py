@@ -77,6 +77,8 @@ class NotionHelper:
         env_file = os.getenv('GITHUB_ENV')
         with open(env_file, "a") as file:
             file.write(f"DATABASE_ID={database_id}\n")
+        print(f"Written DATABASE_ID: {database_id}")  # 添加调试信息
+
 
     def extract_page_id(self, notion_url):
         match = re.search(
