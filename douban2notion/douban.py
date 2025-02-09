@@ -62,6 +62,9 @@ def fetch_movies(user, status):
         else:
             print(f"Failed to fetch data for status {status}: {response.status_code}")
             break
+        
+        if results:
+            print(json.dumps(results[0], indent=4, ensure_ascii=False))
 
     return results
 
