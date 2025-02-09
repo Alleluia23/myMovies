@@ -15,6 +15,8 @@ USER_ICON_URL = "https://www.notion.so/icons/user-circle-filled_gray.svg"
 movie_properties_type_dict = {
     "电影名": TITLE,
     "短评": RICH_TEXT,
+    "ISBN": RICH_TEXT,
+    "链接": URL,
     "导演": RELATION,
     "演员": MULTI_SELECT,
     "封面": FILES,
