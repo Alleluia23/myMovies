@@ -1,4 +1,3 @@
-import argparse
 import os
 import shutil
 import time
@@ -15,17 +14,19 @@ def move_and_rename_file():
     target_path = os.path.join(target_dir, new_filename)
 
     shutil.move(source_path, target_path)
-    return target_path
+    return new_filename  # 返回文件名以便用于生成 URL
 
 
 def main():
     notion_helper = NotionHelper()
-    image_file = move_and_rename_file()
+    new_filename = move_and_rename_file()
 
-    if image_file:
+    if new_filename:
         repository = os.getenv("REPOSITORY")
-        ref = os.getenv("REF", "main").split("/")[-1]
-        image_url = f"https://{os.getenv('REPOSITORY').split('/')[0]}.github.io/{os.getenv('REPOSITORY').split('/')[1]}/{new_filename}"
+        username, repo_name = repository.split("/")
+        
+        # 生成 GitHub Pages URL
+        image_url = f"https://{username}.github.io/{repo_name}/OUT_FOLDER/movie/{new_filename}"
         heatmap_url = f"https://heatmap.malinkang.com/?image={image_url}"
 
         if notion_helper.heatmap_block_id:
