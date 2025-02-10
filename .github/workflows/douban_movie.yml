@@ -3,8 +3,8 @@ name: douban movie sync
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 14 * * *"
-    - cron: "0 22 * * *"
+    - cron: "0 14 * * *"  # 每天英国时间14点运行
+    - cron: "0 22 * * *"  # 每天英国时间22点运行
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   sync:
-    name: Sync
+    name: Sync Douban Movies
     runs-on: ubuntu-latest
     env:
         MOVIE_NOTION_TOKEN: ${{ secrets.MOVIE_NOTION_TOKEN }}
@@ -26,8 +26,11 @@ jobs:
         SPECIAL_COLOR2: ${{ vars.SPECIAL_COLOR2 || '#549F57' }}
         DOM_COLOR: ${{ vars.DOM_COLOR || '#EBEDF0' }}
         TEXT_COLOR: ${{ vars.TEXT_COLOR || '#000000' }}
+        REF: ${{ github.ref }}
+        REPOSITORY: ${{ github.repository }}
+
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -35,19 +38,35 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Sync Douban movies to Notion
+      - name: Sync Douban Movies to Notion
         run: |
           douban "movie"
 
-      - name: Set default year if not provided
+      - name: Set Default Year if Not Provided
         if: env.YEAR == ''
         run: echo "YEAR=$(date +'%Y')" >> $GITHUB_ENV
 
-      - name: Generate Notion heatmap
+      - name: Debug Environment Variables
+        run: |
+          echo "Background Color: ${{ env.BACKGROUND_COLOR }}"
+          echo "Track Color: ${{ env.TRACK_COLOR }}"
+          echo "Special Color 1: ${{ env.SPECIAL_COLOR }}"
+          echo "Special Color 2: ${{ env.SPECIAL_COLOR2 }}"
+          echo "DOM Color: ${{ env.DOM_COLOR }}"
+          echo "Text Color: ${{ env.TEXT_COLOR }}"
+          echo "Year: ${{ env.YEAR }}"
+
+      - name: Debug Heatmap Command
+        run: |
+          echo "Running github_heatmap with the following parameters:"
+          echo "github_heatmap notion --notion_token '${{ secrets.MOVIE_NOTION_TOKEN }}' --database_id '${{ env.DATABASE_ID }}' --date_prop_name '日期' --value_prop_name '看过' --unit '部' --year '${{ env.YEAR }}' --me '${{ secrets.MOVIE_NAME }}' --without-type-name --background-color='${{ env.BACKGROUND_COLOR }}' --track-color='${{ env.TRACK_COLOR }}' --special-color1='${{ env.SPECIAL_COLOR }}' --special-color2='${{ env.SPECIAL_COLOR2 }}' --dom-color='${{ env.DOM_COLOR }}' --text-color='${{ env.TEXT_COLOR }}'"
+
+      - name: Generate Notion Heatmap
         run: |
           github_heatmap notion \
             --notion_token "${{ secrets.MOVIE_NOTION_TOKEN }}" \
@@ -65,16 +84,7 @@ jobs:
             --dom-color="${{ env.DOM_COLOR }}" \
             --text-color="${{ env.TEXT_COLOR }}"
 
-      - name: Debug Environment Variables
-        run: |
-          echo "Background Color: ${{ env.BACKGROUND_COLOR }}"
-          echo "Track Color: ${{ env.TRACK_COLOR }}"
-          echo "Special Color 1: ${{ env.SPECIAL_COLOR }}"
-          echo "Special Color 2: ${{ env.SPECIAL_COLOR2 }}"
-          echo "DOM Color: ${{ env.DOM_COLOR }}"
-          echo "Text Color: ${{ env.TEXT_COLOR }}"
-
-      - name: Push updates to repository
+      - name: Push Updates to Repository
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
