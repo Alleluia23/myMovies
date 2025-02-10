@@ -12,47 +12,58 @@ concurrency:
 
 jobs:
   sync:
-    name: Sync
+    name: Sync Douban Movies
     runs-on: ubuntu-latest
     env:
-        NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-        MOVIE_NOTION_TOKEN: ${{ secrets.MOVIE_NOTION_TOKEN }}
-        NOTION_MOVIE_URL: ${{ secrets.NOTION_MOVIE_URL }}
-        DOUBAN_NAME: ${{ secrets.DOUBAN_NAME }}
-        MOVIE_NAME: ${{ secrets.MOVIE_NAME }}
-        YEAR: ${{ vars.YEAR }}
-        REF: ${{ github.ref }}
-        REPOSITORY: ${{ github.repository }}
+      MOVIE_NOTION_TOKEN: ${{ secrets.MOVIE_NOTION_TOKEN }}
+      NOTION_MOVIE_URL: ${{ secrets.NOTION_MOVIE_URL }}
+      DOUBAN_NAME: ${{ secrets.DOUBAN_NAME }}
+      MOVIE_NAME: ${{ secrets.MOVIE_NAME }}
+      BACKGROUND_COLOR: ${{ vars.BACKGROUND_COLOR || '#FFFFFF' }}
+      TRACK_COLOR: ${{ vars.TRACK_COLOR || '#ACE7AE' }}
+      SPECIAL_COLOR: ${{ vars.SPECIAL_COLOR || '#69C16E' }}
+      SPECIAL_COLOR2: ${{ vars.SPECIAL_COLOR2 || '#549F57' }}
+      DOM_COLOR: ${{ vars.DOM_COLOR || '#EBEDF0' }}
+      TEXT_COLOR: ${{ vars.TEXT_COLOR || '#000000' }}
+      YEAR: ${{ vars.YEAR || '$(date +"%Y")' }}
+      REF: ${{ github.ref }}
+      REPOSITORY: ${{ github.repository }}
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Set Up Python 3.9
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: douban movie sync
+      - name: Sync Douban Movie Data
+        run: douban "movie"
+
+      - name: Generate Notion Heatmap
         run: |
-          douban "movie"
+          github_heatmap notion \
+            --notion_token "${{ secrets.MOVIE_NOTION_TOKEN }}" \
+            --database_id "${{ env.DATABASE_ID }}" \
+            --date_prop_name "日期" \
+            --value_prop_name "看过" \
+            --unit "部" \
+            --year $YEAR \
+            --me "${{ secrets.MOVIE_NAME }}" \
+            --without-type-name \
+            --background-color=${{ env.BACKGROUND_COLOR }} \
+            --track-color=${{ env.TRACK_COLOR }} \
+            --special-color1=${{ env.SPECIAL_COLOR }} \
+            --special-color2=${{ env.SPECIAL_COLOR2 }} \
+            --dom-color=${{ env.DOM_COLOR }} \
+            --text-color=${{ env.TEXT_COLOR }}
 
-      - name: Remove folder
-        run: rm -rf ./OUT_FOLDER/movie
-
-      - name: Set default year if not provided
-        run: echo "YEAR=$(date +"%Y")" >> $GITHUB_ENV
-        if: env.YEAR == ''
-
-      - name: notion heatmap
-        run: |
-          github_heatmap notion  --notion_token "${{secrets.MOVIE_NOTION_TOKEN || secrets.NOTION_TOKEN}}" --database_id "${{ env.DATABASE_ID }}" --date_prop_name "日期" --value_prop_name "看过" --unit "部" --year $YEAR  --me "${{secrets.MOVIE_NAME}}" --without-type-name  --background-color=${{ vars.background_color||'#FFFFFF'}} --track-color=${{ vars.track_color||'#ACE7AE'}} --special-color1=${{ vars.special_color||'#69C16E'}} --special-color2=${{ vars.special_color2||'#549F57'}} --dom-color=${{ vars.dom_color||'#EBEDF0'}} --text-color=${{ vars.text_color||'#000000'}}
-
-      - name: Create Release and Upload Asset
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: "latest"
@@ -61,15 +72,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: udpate heatmap 
-        run: |
-            heatmap "movie"
+      - name: Update Notion with Heatmap URL
+        run: update_heatmap.py "movie"
 
-      - name: push
+      - name: Final Git Push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add .
-          git commit -m 'add new heatmap' || echo "nothing to commit"
+          git add OUT_FOLDER/movie/*.svg
+          git commit -m 'Add new heatmap' || echo "Nothing to commit"
           git pull --rebase origin main
-          git push || echo "nothing to push"
+          git push || echo "Nothing to push"

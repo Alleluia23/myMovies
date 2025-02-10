@@ -25,7 +25,7 @@ def main():
     if image_file:
         repository = os.getenv("REPOSITORY")
         ref = os.getenv("REF", "main").split("/")[-1]
-        image_url = f"https://raw.githubusercontent.com/{os.getenv('REPOSITORY')}/{os.getenv('REF').split('/')[-1]}/{image_file[2:]}"
+        image_url = f"https://{os.getenv('REPOSITORY').split('/')[0]}.github.io/{os.getenv('REPOSITORY').split('/')[1]}/{new_filename}"
         heatmap_url = f"https://heatmap.malinkang.com/?image={image_url}"
 
         if notion_helper.heatmap_block_id:
