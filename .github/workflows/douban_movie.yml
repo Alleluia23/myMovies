@@ -52,7 +52,7 @@ jobs:
 
       - name: Set default year if not provided
         if: env.YEAR == ''
-        run: echo "YEAR=$(date +'%Y')" >> $GITHUB_ENV
+        run: echo "YEAR=2025" >> $GITHUB_ENV
 
       - name: notion heatmap
         run: |
