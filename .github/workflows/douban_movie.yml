@@ -53,7 +53,7 @@ jobs:
             --date_prop_name "日期" \
             --value_prop_name "看过" \
             --unit "部" \
-            --year $YEAR \
+            --year $(date +'%Y') \
             --me "${{ secrets.MOVIE_NAME }}" \
             --without-type-name \
             --background-color=${{ env.BACKGROUND_COLOR }} \
@@ -62,6 +62,7 @@ jobs:
             --special-color2=${{ env.SPECIAL_COLOR2 }} \
             --dom-color=${{ env.DOM_COLOR }} \
             --text-color=${{ env.TEXT_COLOR }}
+
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
