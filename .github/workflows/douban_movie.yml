@@ -43,6 +43,10 @@ jobs:
         run: |
           douban "movie"
 
+      - name: Set default year if not provided
+        run: echo "YEAR=$(date +"%Y")" >> $GITHUB_ENV
+        if: env.YEAR == ''
+
       - name: Generate Notion heatmap
         run: |
           github_heatmap notion \
