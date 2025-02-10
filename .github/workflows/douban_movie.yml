@@ -77,12 +77,12 @@ jobs:
             --year "${{ env.YEAR }}" \
             --me "${{ secrets.MOVIE_NAME }}" \
             --without-type-name \
-            --background-color="${{ env.BACKGROUND_COLOR }}" \
-            --track-color="${{ env.TRACK_COLOR }}" \
-            --special-color1="${{ env.SPECIAL_COLOR }}" \
-            --special-color2="${{ env.SPECIAL_COLOR2 }}" \
-            --dom-color="${{ env.DOM_COLOR }}" \
-            --text-color="${{ env.TEXT_COLOR }}"
+            --background-color=${{ env.BACKGROUND_COLOR }} \
+            --track-color=${{ env.TRACK_COLOR }} \
+            --special-color1=${{ env.SPECIAL_COLOR }} \
+            --special-color2=${{ env.SPECIAL_COLOR2 }} \
+            --dom-color=${{ env.DOM_COLOR }} \
+            --text-color=${{ env.TEXT_COLOR }}
 
       - name: Push Updates to Repository
         run: |
