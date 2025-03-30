@@ -192,3 +192,19 @@ class NotionHelper:
         properties["月"] = get_relation([self.get_month_relation_id(date)])
         properties["周"] = get_relation([self.get_week_relation_id(date)])
         properties["日"] = get_relation([self.get_day_relation_id(date)])
+
+    def search_database(self, block_id):
+        try:
+            children = self.client.blocks.children.list(block_id=block_id)["results"]
+            for child in children:
+                print(f"Child Type: {child['type']}, ID: {child.get('id')}, Title: {child.get('child_database', {}).get('title')}")
+                if child["type"] == "child_database":
+                    db_title = child.get("child_database").get("title")
+                    db_id = child.get("id")
+                    print(f"Found Database: {db_title}, ID: {db_id}")
+                    self.database_id_dict[db_title] = db_id
+                if "has_children" in child and child["has_children"]:
+                    self.search_database(child["id"])
+            print(f"Final database ID dictionary: {self.database_id_dict}")
+        except Exception as e:
+            print(f"Error while searching database: {str(e)}")
