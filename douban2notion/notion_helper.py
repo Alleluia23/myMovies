@@ -73,9 +73,7 @@ class NotionHelper:
         if self.day_database_id:
             self.write_database_id(self.day_database_id)
             
-        print(f"Extracted Page ID: {self.page_id}")
-        print(f"Database Name Dictionary: {self.database_name_dict}")
-        print(f"Database ID Dictionary: {self.database_id_dict}")
+        self.test_get_blocks()
 
 
     def write_database_id(self, database_id):
@@ -198,19 +196,13 @@ class NotionHelper:
         properties["周"] = get_relation([self.get_week_relation_id(date)])
         properties["日"] = get_relation([self.get_day_relation_id(date)])
 
-    def search_database(self, block_id):
+    def test_get_blocks(self):
+        print(f"Testing block retrieval for page ID: {self.page_id}")
         try:
-            children = self.client.blocks.children.list(block_id=block_id)["results"]
+            children = self.client.blocks.children.list(block_id=self.page_id)["results"]
             for child in children:
-                print(f"Child Type: {child['type']}, ID: {child.get('id')}, Title: {child.get('child_database', {}).get('title')}")
-                if child["type"] == "child_database":
-                    db_title = child.get("child_database").get("title")
-                    db_id = child.get("id")
-                    print(f"Found Database: {db_title}, ID: {db_id}")
-                    self.database_id_dict[db_title] = db_id
-                if "has_children" in child and child["has_children"]:
-                    self.search_database(child["id"])
-            print(f"Final database ID dictionary: {self.database_id_dict}")
+                print(f"Block Type: {child['type']}, ID: {child.get('id')}, Title: {child.get('child_database', {}).get('title')}, Has Children: {child.get('has_children')}")
         except Exception as e:
-            print(f"Error while searching database: {str(e)}")
+            print(f"Error while retrieving blocks: {str(e)}")
+
 
