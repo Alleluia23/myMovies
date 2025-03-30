@@ -73,7 +73,6 @@ class NotionHelper:
         if self.day_database_id:
             self.write_database_id(self.day_database_id)
 
-
     def write_database_id(self, database_id):
         env_file = os.getenv('GITHUB_ENV')
         with open(env_file, "a") as file:
@@ -188,4 +187,8 @@ class NotionHelper:
         
         return results
 
-
+    def get_date_relation(self, properties, date):
+        properties["年"] = get_relation([self.get_year_relation_id(date)])
+        properties["月"] = get_relation([self.get_month_relation_id(date)])
+        properties["周"] = get_relation([self.get_week_relation_id(date)])
+        properties["日"] = get_relation([self.get_day_relation_id(date)])
