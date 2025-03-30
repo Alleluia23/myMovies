@@ -192,3 +192,5 @@ class NotionHelper:
         properties["月"] = get_relation([self.get_month_relation_id(date)])
         properties["周"] = get_relation([self.get_week_relation_id(date)])
         properties["日"] = get_relation([self.get_day_relation_id(date)])
+
+print(f"Extracted Page ID: {self.page_id}")
