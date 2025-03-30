@@ -72,6 +72,11 @@ class NotionHelper:
 
         if self.day_database_id:
             self.write_database_id(self.day_database_id)
+            
+        print(f"Extracted Page ID: {self.page_id}")
+        print(f"Database Name Dictionary: {self.database_name_dict}")
+        print(f"Database ID Dictionary: {self.database_id_dict}")
+
 
     def write_database_id(self, database_id):
         env_file = os.getenv('GITHUB_ENV')
@@ -208,3 +213,4 @@ class NotionHelper:
             print(f"Final database ID dictionary: {self.database_id_dict}")
         except Exception as e:
             print(f"Error while searching database: {str(e)}")
+
