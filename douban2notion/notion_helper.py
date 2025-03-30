@@ -72,8 +72,6 @@ class NotionHelper:
 
         if self.day_database_id:
             self.write_database_id(self.day_database_id)
-            
-        self.test_get_blocks()
 
 
     def write_database_id(self, database_id):
@@ -189,20 +187,5 @@ class NotionHelper:
             results.extend(response.get("results"))
         
         return results
-
-    def get_date_relation(self, properties, date):
-        properties["年"] = get_relation([self.get_year_relation_id(date)])
-        properties["月"] = get_relation([self.get_month_relation_id(date)])
-        properties["周"] = get_relation([self.get_week_relation_id(date)])
-        properties["日"] = get_relation([self.get_day_relation_id(date)])
-
-    def test_get_blocks(self):
-        print(f"Testing block retrieval for page ID: {self.page_id}")
-        try:
-            children = self.client.blocks.children.list(block_id=self.page_id)["results"]
-            for child in children:
-                print(f"Block Type: {child['type']}, ID: {child.get('id')}, Title: {child.get('child_database', {}).get('title')}, Has Children: {child.get('has_children')}")
-        except Exception as e:
-            print(f"Error while retrieving blocks: {str(e)}")
 
 
